@@ -1,7 +1,9 @@
 <script>
-    import UserManagement from "./components/UserManagement.svelte";
+import GetUser from "./components/GetUser.svelte";
+  import Index from "./components/Index.svelte";
+import UserManagementList from "./components/Index.svelte";
 </script>
-<UserManagement/>
+<Index/>
 <style>
   
 </style>

@@ -1,22 +1,23 @@
 const fs = require("fs");
-const express = require("express");
 const validator = require("validator");
 const { v4: uuidv4 } = require("uuid");
 //bcrypt for encrypting password
 const bcrypt = require("bcrypt");
 const { use } = require("../route/userManagementRoute");
+const  { readUserDataFromJsonFile,writeUserDataInJsonFile }=require("../model/fileModel");
 const saltRounds = 10;
 //post method controller
 exports.postUserDataInJsonFileService = (bodyData) => {
-  console.log(bodyData);
+  console.log(bodyData.gender);
   //collected stored json user data and here stored in existUsers variable
   const existUsers = readUserDataFromJsonFile();
   //we get 0 1 2 as gender radio button value based on that we stored actual gender in user data json file
   let genderValue = bodyData.gender;
+  console.log(genderValue)
   let gender;
-  if (genderValue === 0) {
+  if (genderValue === "male") {
     gender = "Male";
-  } else if (genderValue === 1) {
+  } else if (genderValue === "female") {
     gender = "Female";
   } else {
     gender = "other";
@@ -33,7 +34,7 @@ exports.postUserDataInJsonFileService = (bodyData) => {
     location: bodyData.location,
     address: bodyData.address,
   };
-  console.log(userData)
+
   //validation applied on fields here we used npm validator
   if (
     !validator.isAlpha(userData.userName, "en-US", { ignore: "-" }) &&
@@ -59,7 +60,7 @@ exports.postUserDataInJsonFileService = (bodyData) => {
   } else {
     existUsers.push(userData);
     writeUserDataInJsonFile(existUsers);
-    console.log(existUsers);
+   
   }
   return {
     success: true,
@@ -97,9 +98,9 @@ exports. getSingleUserDataByUserIdServices = (id) => {
     const userId =id;
     let genderValue = bodyData.gender;
   let gender;
-  if (genderValue === 0) {
+  if (genderValue === "Male") {
     gender = "Male";
-  } else if (genderValue === 1) {
+  } else if (genderValue === "Female") {
     gender = "Female";
   } else {
     gender = "other";
@@ -132,7 +133,7 @@ exports. getSingleUserDataByUserIdServices = (id) => {
     const existUsers = readUserDataFromJsonFile();
     const filterUser = existUsers.filter((element) => element.id !== userId);
     if (existUsers.length === filterUser.length) {
-      return {success: false, error: "user id does not exist" };
+      return {success: false, error: "user does not exist" };
     }
     //save the filtered data
     writeUserDataInJsonFile(filterUser);
@@ -146,16 +147,3 @@ exports. deleteAllRecordsService = () => {
     writeUserDataInJsonFile(filterUser);
     return{ success: true, msg: "all User removed successfully" };
   };
-//read the user data from json file
-const writeUserDataInJsonFile = (data) => {
-  console.log(data);
-  const stringifyData = JSON.stringify(data);
-  fs.writeFileSync("userDatabase.json", stringifyData);
-};
-
-//get the user data from json file
-const readUserDataFromJsonFile = () => {
-  const jsonData = fs.readFileSync("userDatabase.json");
-  return JSON.parse(jsonData);
-};
-/* util functions ends */

@@ -1,5 +1,6 @@
 const express = require("express");
 const {postUserDataInJsonFileService,getAllUserDataServices,getSingleUserDataByUserIdServices,updateUserDataService,deleteSingleRecordService,deleteAllRecordsService}=require("../services/userManagementServices")
+//post method for sending data to json file
 const postUserDataInJsonFile = (req, res) => {
   console.log
  const serviceResponse=postUserDataInJsonFileService(req.body);
@@ -9,7 +10,7 @@ const postUserDataInJsonFile = (req, res) => {
   res.status(400).send(serviceResponse.error);
 }
 };
-//GET method for getting all data form json file
+//GET method for getting all data from json file
 const getAllUserData = (req, res) => {
   //readUserDataFromJsonFile function read and parse json data
   const users = getAllUserDataServices();
