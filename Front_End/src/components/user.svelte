@@ -1,128 +1,189 @@
 <script>
-  import userStoreData from "./store/userStore";
+  // import userStoreData from "./store/userStore";
   import { onMount } from "svelte";
+  import { Confirm } from "svelte-confirm";
   export let getData;
+  export let postData;
+  export let allRecord;
+  export let recordOutOffTotal;
+  export let displayRecordPerPage;
+  export let page;
+  const handlePrev = () => {
+    dispatch("prev", { message: "prev" });
+  };
+  const handleNext = () => {
+    if (displayRecordPerPage === 7) {
+      dispatch("next", { message: "next" });
+    } else {
+      console.log("no next record");
+    }
+  };
+  const handlePage = (page) => {
+    dispatch("page", page);
+  };
+
   onMount(() => {
     getData();
   });
-  
+
   import { createEventDispatcher } from "svelte";
   const dispatch = createEventDispatcher();
   const updateData = (data) => {
     dispatch("onUpdate", data);
   };
   const DeleteData = (data) => {
-    dispatch("onDelete", data.id);
+    console.log(data);
+    dispatch("onDelete", data);
   };
- 
 </script>
 
 <div class="main">
   <div class="report-container">
-    <div class="report-header">
+    <!-- <div class="report-header">
       <h1 class="users">Users</h1>
-    </div>
-
+    </div> -->
     <div class="report-body">
       <table class="table table-striped table-hover">
         <thead class="align">
           <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
+            <th>User Name</th>
+            <!-- <th>Last Name</th> -->
             <th>Email</th>
             <th>Gender</th>
             <th>Date Of Birth</th>
-            <th>Location</th>
             <th>Address</th>
             <th class="tableAction">Action</th>
           </tr>
         </thead><tbody>
-          {#each $userStoreData as item}
+          {#each postData as item}
             <tr>
-              <td>{item.userName}</td>
-              <td>{item.lastName}</td>
+              <td>{item.userName} {item.lastName}</td>
+              <!-- <td>{item.lastName}</td> -->
               <td>{item.email}</td>
               <td>{item.gender}</td>
               <td>{item.dateOfBirth}</td>
-              <td>{item.location}</td>
-              <td>{item.address}</td>
-              <td>
-                <button class="editButton" on:click={updateData(item)}
-                  >edit</button
-                ><button class="deleteButton" on:click={DeleteData(item)}
-                >delete</button
-              ></td
+              <td
+                >{item.address}
+                {item.street}
+                {item.landmark}
+                {item.city}
+                {item.state}
+                {item.pin}</td
               >
+              <td>
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <element
+                  on:click={updateData(item)}
+                  class="material-symbols-outlined"
+                  style="color: cornflowerblue;width: 20px;margin-right: 20px;cursor: pointer;"
+                  title="Edit">Settings</element
+                >
+                <Confirm
+                  let:confirm={confirmThis}
+                  confirmTitle="Delete"
+                  cancelTitle="Cancel"
+                  themeColor="250"
+                >
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <element on:click={() => confirmThis(DeleteData, item.id)}>
+                    <i
+                      class="material-icons"
+                      title="delete"
+                      style="color:red;cursor: pointer">cancel</i
+                    >
+                  </element>
+                  <span slot="title"> Delete this item? </span>
+                  <span slot="description">
+                    You won't be able to revert this!
+                  </span>
+                </Confirm>
+              </td>
             </tr>
           {:else}
             <h2>Loading...</h2>
           {/each}
         </tbody>
       </table>
+      <div class="clearfix">
+        <div class="hint-text">
+          Showing <b>{(page - 1) * 7 + 1}</b> to
+          <b>{(page - 1) * 7 + displayRecordPerPage}</b> entries out of
+          <b>{allRecord}</b>
+        </div>
+        <ul class="pagination">
+          <li class="page-item ">
+            <a
+              href="#"
+              class={1 === page ? "invisible" : "page-link"}
+              on:click={() => {
+                handlePrev();
+              }}>Previous</a
+            >
+          </li>
+          {#each Array(recordOutOffTotal) as pbs, i}
+            <li class={page === i ? "page-item active" : "page-item"}>
+              <a
+                href="#"
+                on:click={() => {
+                  handlePage(i);
+                }}
+                class="page-link">{i++ +1}</a
+              >
+            </li>
+          {/each}
+          <li class="page-item">
+            <a
+              href="#"
+              class={allRecord === page ? "invisible" : "page-link"}
+              on:click={() => {
+                handleNext();
+              }}>Next</a
+            >
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </div>
 
 <style>
-  .main {
-    width: 100%;
-    overflow-y: scroll;
-    overflow-x: hidden;
+  .pagination {
+    float: right;
+    margin: 0 0 5px;
   }
-  .report-container {
-    min-height: 300px;
-    max-width: 1200px;
-    background-color: #ffffff;
-    border-radius: 5px;
-    box-shadow: 3px 3px 10px rgb(188, 188, 188);
-    padding: 0px 20px 20px 20px;
-  }
-  .report-header {
-    height: 80px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 20px 10px 20px;
-    border-bottom: 2px solid rgba(0, 20, 151, 0.59);
-  }
-
-  .users {
-    font-size: 30px;
-    font-weight: 600;
-    color: #5500cb;
-    margin-left: 40%;
-  }
-
-  .report-body {
-    max-width: 1160px;
-    overflow-x: auto;
-    padding: 20px;
-  }
-  .editButton {
-    margin-right: 20px;
-   margin-bottom: 1px;
-    width: 65px;
-    border-radius: 5px;
+  .pagination li a {
     border: none;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 100;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background-color: rgb(46, 131, 46);
+    font-size: 13px;
+    min-width: 30px;
+    min-height: 30px;
+    color: #999;
+    margin: 0 2px;
+    line-height: 30px;
+    border-radius: 2px !important;
+    text-align: center;
+    padding: 0 6px;
   }
-  .deleteButton {
-    width: 65px;
-    border-radius: 5px;
-    border: none;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 100;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: linear-gradient(135deg, #e83609, #f13709);
+  .pagination li a:hover {
+    color: #666;
+  }
+  .pagination li.active a,
+  .pagination li.active a.page-link {
+    background: #03a9f4;
+  }
+  .pagination li.active a:hover {
+    background: #0397d6;
+  }
+  /* .pagination li.disabled i {
+    color: #ccc;
+  } */
+  .pagination li i {
+    font-size: 16px;
+    padding-top: 6px;
+  }
+  .hint-text {
+    float: left;
+    margin-top: 10px;
+    margin-left: 5px;
+    font-size: 13px;
   }
 </style>

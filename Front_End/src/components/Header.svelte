@@ -1,9 +1,15 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-  
 const dispatch = createEventDispatcher();
 const displayBlockStatus=()=>{
     dispatch("onAdd",{displayBlock : "addUserButtonClicked"})
+}
+const homeButtonAction=()=>{
+    dispatch("onHome",{displayBlock : "addUserButtonClicked"})
+}
+let searchBValue="";
+const searchFunction=()=>{
+    dispatch("onSearch",{searchBValue : searchBValue})
 }
 </script>
 <header>
@@ -11,10 +17,19 @@ const displayBlockStatus=()=>{
       <div class="headingName">User Management</div>
     </div>
     <div>
+      <input type="search" id="searchBar" placeholder="search by email" bind:value={searchBValue}/>
+      <button type="button" id="searchBtn" on:click={searchFunction(searchBValue)}>
+      <i class="fas fa-search"></i>
+    </button>
       <button
-        class="addNewUserButton"
-        on:click={displayBlockStatus}
-        ><i class="material-icons">&#xE147;</i>Add User</button
+      class="addNewUserButton"
+      on:click={displayBlockStatus}
+      ><i class="material-icons">&#xE147;</i>Add New User</button
+    >
+      <button
+        class="home"
+        on:click={homeButtonAction}
+        ><i class="material-icons">home</i>Home</button
       >
     </div>
   </header>
@@ -32,26 +47,41 @@ const displayBlockStatus=()=>{
     height: 70px;
     width: 100vw;
     padding: 0 30px;
-    background-color: black;
-    position: fixed;
+    background-color:#3199f6;
+    position: absolute;
     z-index: 100;
     box-shadow: 1px 1px 15px rgba(161, 182, 253, 0.825);
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  .addNewUserButton {
-    width: 110px;
+  .addNewUserButton ,.home,.searchBtn,.searchBar{
+    /* width: 110px;
     height: 32px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    
+  
     color: white;
     border-radius: 50px 50px;
     background-color: rgb(32, 32, 241);
-    cursor: pointer;
+    cursor: pointer; */
+    align-items: center;
+    justify-content: center;
+    color: #566787;
+    float: right;
+    font-size: 13px;
+    background: #fff;
+    border: none;
+    width: 150px;
+    min-width: 50px;
+    border-radius: 2px;
+    height: 32px;
+    display: flex;
+    border: none;
+    margin-left: 10px;
   }
-  .addNewUserButton:hover {
-    background-color: rgb(170, 170, 249);
+  .addNewUserButton:hover ,.home:hover{
+    background-color: rgb(206, 206, 210);
   }
+  
   </style>

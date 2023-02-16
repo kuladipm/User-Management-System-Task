@@ -31,8 +31,12 @@ exports.postUserDataInJsonFileService = (bodyData) => {
     password: bcrypt.hashSync(bodyData.password, saltRounds),
     gender: gender,
     dateOfBirth: bodyData.dateOfBirth,
-    location: bodyData.location,
-    address: bodyData.address,
+    address:bodyData.address,
+    street:bodyData.street,
+    landmark:bodyData.landmark,
+    city:bodyData.city,
+    state: bodyData.state,
+    pin: bodyData.pin,
   };
 
   //validation applied on fields here we used npm validator
@@ -49,10 +53,6 @@ exports.postUserDataInJsonFileService = (bodyData) => {
   } else if (!validator.isDate(bodyData.dateOfBirth)) {
     return { success: false, error: "invalid date" };
   }
-  //    if (userData.userName === null || userData.dateOfBirth===null || userData.email === null|| userData.password ===null||userData.location===null ||userData.address===null) {
-  //        return { success: false, error: 'data in user field are missing'}
-  //    }
-
   //here we check unique email if found shows status error if not found we store entire data into json file
   const findExist = existUsers.find((user) => user.email === userData.email);
   if (findExist) {
@@ -76,15 +76,16 @@ exports. getAllUserDataServices = () => {
   };
 
   //GET services for specific username data
-exports. getSingleUserDataByUserIdServices = (id) => {
+exports. getSingleUserDataByUserIdServices = (email) => {
     //get username from url
-    const userId = id;
+    console.log(email)
+    const userId = email;
     //get the existing user data
     const existUsers = readUserDataFromJsonFile();
     //check if the username exist or not
-    const findExist = existUsers.find((element) => element.id === userId);
+    const findExist = existUsers.find((element) => element.email === userId);
     if (!findExist) {
-      return { success: false, error: "user id not exist" };
+      return { success: false, error: "email not exist" };
     }
     //send specific username data
     return {
@@ -92,40 +93,92 @@ exports. getSingleUserDataByUserIdServices = (id) => {
         findExist,
       };
   };
-
-  exports. updateUserDataService = (id,bodyData) => {
-    //get the username from urls
-    const userId =id;
-    let genderValue = bodyData.gender;
-  let gender;
-  if (genderValue === "Male") {
-    gender = "Male";
-  } else if (genderValue === "Female") {
-    gender = "Female";
-  } else {
-    gender = "other";
-  }
-    //get the update data
-    const userData = {
-        id: uuidv4(),
-        userName: bodyData.userName,
-        lastName: bodyData.lastName,
-        email: bodyData.email,
-        password: bcrypt.hashSync(bodyData.password, saltRounds),
-        gender: gender,
-        dateOfBirth: bodyData.dateOfBirth,
-        location: bodyData.location,
-        address: bodyData.address,
-    };
+  //GET method for pagination data
+  exports. getPaginationDataServices = (pageValue,limitValue) => {
+    console.log(pageValue)
+    console.log(limitValue)
     const existUsers = readUserDataFromJsonFile();
-    const findExist = existUsers.find((element) => element.id === userId);
-    if (!findExist) {
-      return { success: false, error: "user id not exist", id };
+        let page = parseInt(pageValue);
+        let limit = parseInt(limitValue);
+        let totalRecords=existUsers.length
+        // calculating the starting and ending index
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+        paginationData= existUsers.slice(startIndex, endIndex);
+        // return  results;
+        return{ paginationData:paginationData, totalRecords:totalRecords,existUsers:existUsers};
+        // next();
+      };
+    
+
+  
+  // exports. updateUserDataService = (id,bodyData) => {
+  //   //get the username from urls
+  //   const userId =id;
+  // let genderValue = bodyData.gender;
+  // console.log(genderValue)
+  // // let gender;
+  // if (genderValue === "Male") {
+  //   genderValue = "Male";
+  // } else if (genderValue ==="Female") {
+  //   genderValue = "Female";
+  // } else if (genderValue ==="other"){
+  //   genderValue = "other";
+  // }
+  //   //get the update data
+  //   const userData = {
+  //       id: uuidv4(),
+  //       userName: bodyData.userName,
+  //       lastName: bodyData.lastName,
+  //       email: bodyData.email,
+  //       password: bcrypt.hashSync(bodyData.password, saltRounds),
+  //       gender: genderValue,
+  //       dateOfBirth: bodyData.dateOfBirth,
+  //       location: bodyData.location,
+  //       address: bodyData.address,
+  //   };
+  //   const existUsers = readUserDataFromJsonFile();
+  //   const findExist = existUsers.find((element) => element.id === userId);
+  //   if (!findExist) {
+  //     return { success: false, error: "user id not exist", id };
+  //   }
+  //   const updateUser = existUsers.filter((element) => element.id !== userId);
+  //   updateUser.push(userData);
+  //   writeUserDataInJsonFile(updateUser);
+  //   return{ success: true, body: "User data updated successfully !!" };
+  // };
+
+  exports.updateUserDataService = (userId, body) => {
+    const existingUser = readUserDataFromJsonFile();
+    let id = userId;
+    let bodyData = body;
+    if (bodyData.userName.trim() === "" || !validator.isAlpha(bodyData.userName) ||
+    bodyData.lastName.trim() === "" || !validator.isAlpha(bodyData.lastName) ||
+    !validator.isEmail(bodyData.email)) {
+      return { success: false, error: `Please Enter Valid Data!`};
+    } else {
+      let user = existingUser.find((user) => user.id === id);
+      if (bodyData.userName ) user.userName = bodyData.userName;
+      // if (bodyData.middleName)  user.middleName = bodyData.middleName;
+      if (bodyData.lastName)  user.lastName = bodyData.lastName;
+      if (bodyData.gender)  user.gender = bodyData.gender;
+      if (bodyData.dateOfBirth)  user.dateOfBirth = bodyData.dateOfBirth;
+      if (bodyData.email)  user.email = bodyData.email;
+      if (bodyData.password)  user.password = bcrypt.hashSync(bodyData.password, 10);
+      if (bodyData.address)  user.address = bodyData.address;
+      if (bodyData.street)  user.street = bodyData.street;
+      if (bodyData.landmark)  user.landmark = bodyData.landmark;
+      if (bodyData.city)  user.city = bodyData.city;
+      if (bodyData.state)  user.state = bodyData.state;
+      if (bodyData.pin)  user.pin = bodyData.pin;
+      // if (bodyData.state)  user.state = bodyData.state;
+      // if (bodyData.pinCode)  user.pinCode = bodyData.pinCode;
+      else {
+        return { success: false, body: `Record Not Found!`};
+      }
+      writeUserDataInJsonFile(existingUser);
+      return { success: true, body: `User Data Updated Successfully!` };
     }
-    const updateUser = existUsers.filter((element) => element.id !== userId);
-    updateUser.push(userData);
-    writeUserDataInJsonFile(updateUser);
-    return{ success: true, body: "User data updated successfully !!" };
   };
   //delete single record services
   exports. deleteSingleRecordService = (id) => {
