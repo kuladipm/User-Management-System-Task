@@ -8,23 +8,27 @@
   //for pagination we send page as number to params an this is reactive
   $: page = 1;
   //total records length stored in all record variable which is came from back end
-  let allRecord = "";
+  let totalRecordsInDb = "";
   //for showing how many record are displayed in a page out off total records
-  let displayRecordPerPage = "";
+  let recordsSeenInPage = "";
   //for showing no of pages from all records by using math.ceil formula
-  let recordOutOffTotal = "";
+  let totalPages = "";
   //main array
   let postData = [];
+  let foundSearchData = [];
+  let searchData = "";
+  let loading = true;
 //page variable we bind with page number method so that we handle pagination
   $: pageNumber = (e) => {
-    if (e.detail.message === "next" && page < allRecord) {
+    if (e.detail.message === "next" && page < totalPages) {
       page++;
+      console.log(e.detail);
       getData();
-    } else if (e.detail.message === "prev" && page > 1 && page <= allRecord) {
+    } else if (e.detail.message === "prev" && page > 1 && page <= totalPages) {
       page--;
       getData();
       console.log("prev pressed");
-    } else if (e.detail > 0 && e.detail <= allRecord) {
+    } else if (e.detail > 0 && e.detail <= totalPages) {
       console.log(e.detail + "pressed");
       page = e.detail;
       getData();
@@ -32,8 +36,9 @@
   };
   //called get api through async and await and data is stored in array
   const getData = async () => {
+    try {
     const res = await fetch(
-      `http://localhost:3000/user/data/paginate?page=${page}&limit=7`,
+      `http://localhost:3000/user/data/paginate?page=${page}&limit=5`,
       {
         method: "GET",
         headers: { "content-type": "application/json" },
@@ -41,9 +46,16 @@
     );
     const apiData = await res.json();
     postData = apiData.paginationData;
-    allRecord = apiData.totalRecords;
-    displayRecordPerPage = postData.length;
-    recordOutOffTotal = Math.ceil(allRecord / 7);
+    totalRecordsInDb = apiData.totalRecords;
+    recordsSeenInPage = postData.length;
+    totalPages = Math.ceil(totalRecordsInDb / 5);
+  } catch (error) {
+      console.log(error);
+    } finally {
+      () => {
+        loading = false;
+      };
+    }
   };
   //when user clicked on addUser button called this function
   const addUserClicked = (e) => {
@@ -114,16 +126,24 @@
     }
   };
   //delete api called on event handler of user delete button action
-  const handleDeleteData = (e) => {
-    let id = e.detail;
-    console.log(e.detail);
-    //through id we filtered data from store and deleting that
-    let filteredData = postData.filter((res) => res.id !== id);
-    postData = filteredData;
+  const handleDeleteData = async (e) => {
     try {
-      fetch(`http://localhost:3000/user/${id}`, { method: "DELETE" })
-        .then((response) => response.text())
-        .then((result) => console.log(result));
+      const res=await fetch(`http://localhost:3000/user/${e.detail}`, 
+      { method: "DELETE" 
+    });
+    const response = await res.text();
+        let deleteId = "";
+      for (let i = 0; i < postData.length; i++) {
+        if (postData[i].id === e.detail) {
+          deleteId = i;
+        }
+      }
+      postData.splice(deleteId, 1);
+      postData = postData;
+      toast.success(`User Data Deleted Successfully`, {
+        position: "bottom-center",
+      });
+      getData();
     } catch (error) {
       console.log(error);
     }
@@ -182,7 +202,7 @@
           landmark: updateApiData.landmark.trim(),
           city: updateApiData.city,
           state: updateApiData.state,
-          pin: updateApiData.pin.trim(),
+          pin: updateApiData.pin,
         }),
       })
         .then((response) => response.text())
@@ -192,29 +212,71 @@
         });
     }
   };
-  
-    const searchData =(e) => {
-      
-    
+  //get single user based on email
+  const getSingleId = async (email) => {
+    try {
+      const url = `http://localhost:3000/user/${email}`;
+      console.log(url);
+      const res = await fetch(url, {
+        method: "GET",
+      });
+      let apiData = await res.json();
+      foundSearchData[0] = apiData;
+      console.log(foundSearchData);
+      totalRecordsInDb = 1;
+      recordsSeenInPage = 1; 
+      totalPages = 1;
+      console.log();
+    } catch (error) {
+      console.log(error.text);
+      toast.error(`Data Not Found`, {
+        position: "bottom-center",
+      });
+      displayBlock = "dashboard";
+    }
   };
-  
-  
+    
+  const searchUse=(e)=>{
+    if (e.detail.searchBValue.trim()==="") {
+      return ;
+    } 
+    searchData=e.detail.searchBValue.trim()
+    displayBlock="searchDataField"
+    
+  }
+
 </script>
 
 <!-- for header part rendering -->
-<Header on:onAdd={addUserClicked} on:onHome={homeRender} on:onSearch={searchData} />
+<Header on:onAdd={addUserClicked} on:onHome={homeRender} />
 <div class="main-container">
   <Toaster />
   <!-- for displaying dashboard witch changing displayBlock status -->
-  {#if displayBlock === "default" || displayBlock === "dataUpdated" || displayBlock === "dataPosted" || displayBlock === "homeButtonClicked"}
+  {#if displayBlock === "default" || displayBlock === "dataUpdated" || displayBlock === "dataPosted" || displayBlock === "homeButtonClicked"||displayBlock === "homeButtonClicked"}
     <User
       on:onDelete={handleDeleteData}
       on:onUpdate={handleUpdateData}
       {getData}
       {postData}
-      {allRecord}
-      {displayRecordPerPage}
-      {recordOutOffTotal}
+      {totalRecordsInDb}
+      {recordsSeenInPage}
+      {totalPages}
+      {page}
+      on:page={pageNumber}
+      on:prev={pageNumber}
+      on:next={pageNumber}
+      on:onSearch={searchUse}
+    />
+  {:else if displayBlock === "searchDataField"}
+    <User
+      on:onDelete={handleDeleteData}
+      on:onUpdate={handleUpdateData}
+      postData={foundSearchData}
+      getData={getSingleId}
+      {searchData}
+      {totalRecordsInDb}
+      {recordsSeenInPage}
+      {totalPages}
       {page}
       on:page={pageNumber}
       on:prev={pageNumber}

@@ -79,25 +79,30 @@ exports. getAllUserDataServices = () => {
 exports. getSingleUserDataByUserIdServices = (email) => {
     //get username from url
     console.log(email)
-    const userId = email;
+    // const userId = email;
     //get the existing user data
     const existUsers = readUserDataFromJsonFile();
     //check if the username exist or not
-    const findExist = existUsers.find((element) => element.email === userId);
-    if (!findExist) {
-      return { success: false, error: "email not exist" };
-    }
-    //send specific username data
-    return {
-        success: true,
-        findExist,
-      };
+    const findExist = existUsers.find(function (e) {
+      // return e.email === email;
+      if(e.email.toLowerCase().match(email.toLowerCase())){
+          return true;
+      }else{
+          return false;
+      }
+  });
+  if (findExist === undefined) {
+      return false;
+  } else {
+      return findExist;
+  }
   };
   //GET method for pagination data
   exports. getPaginationDataServices = (pageValue,limitValue) => {
     console.log(pageValue)
     console.log(limitValue)
     const existUsers = readUserDataFromJsonFile();
+    console.log(existUsers)
         let page = parseInt(pageValue);
         let limit = parseInt(limitValue);
         let totalRecords=existUsers.length
@@ -109,8 +114,6 @@ exports. getSingleUserDataByUserIdServices = (email) => {
         return{ paginationData:paginationData, totalRecords:totalRecords,existUsers:existUsers};
         // next();
       };
-    
-
   
   // exports. updateUserDataService = (id,bodyData) => {
   //   //get the username from urls

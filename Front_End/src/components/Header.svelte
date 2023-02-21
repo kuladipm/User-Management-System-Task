@@ -7,20 +7,20 @@ const displayBlockStatus=()=>{
 const homeButtonAction=()=>{
     dispatch("onHome",{displayBlock : "addUserButtonClicked"})
 }
-let searchBValue="";
-const searchFunction=()=>{
-    dispatch("onSearch",{searchBValue : searchBValue})
-}
+// let searchBValue="";
+// const searchFunction=()=>{
+//     dispatch("onSearch",{searchBValue : searchBValue})
+// }
 </script>
 <header>
     <div class="mainHeading">
       <div class="headingName">User Management</div>
     </div>
     <div>
-      <input type="search" id="searchBar" placeholder="search by email" bind:value={searchBValue}/>
-      <button type="button" id="searchBtn" on:click={searchFunction(searchBValue)}>
+      <!-- <input type="search" id="searchBar" placeholder="search by email" style="padding-bottom: 0px;text-align: center ;" bind:value={searchBValue}/>
+      <button type="button" id="searchBtn " style="padding-bottom: 0px;text-align: center;" on:click={searchFunction(searchBValue)}>
       <i class="fas fa-search"></i>
-    </button>
+    </button> -->
       <button
       class="addNewUserButton"
       on:click={displayBlockStatus}
@@ -47,6 +47,7 @@ const searchFunction=()=>{
     height: 70px;
     width: 100vw;
     padding: 0 30px;
+    padding-right: 10px;
     background-color:#3199f6;
     position: absolute;
     z-index: 100;
@@ -55,7 +56,7 @@ const searchFunction=()=>{
     justify-content: space-between;
     align-items: center;
   }
-  .addNewUserButton ,.home,.searchBtn,.searchBar{
+  .addNewUserButton ,.home{
     /* width: 110px;
     height: 32px;
     display: flex;
@@ -79,9 +80,13 @@ const searchFunction=()=>{
     display: flex;
     border: none;
     margin-left: 10px;
+    font-family: "Varela Round", sans-serif;
   }
   .addNewUserButton:hover ,.home:hover{
     background-color: rgb(206, 206, 210);
+  }
+  .mainHeading{
+    font-family: "Varela Round", sans-serif;
   }
   
   </style>

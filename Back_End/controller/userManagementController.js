@@ -23,10 +23,10 @@ const getAllUserData = (req, res) => {
   //readUserDataFromJsonFile function read and parse json data
   if(JSON.stringify(req.params) !== "{}"){
     const singleUser = getSingleUserDataByUserIdServices(req.params.email);
-    if (singleUser.success === true) {
-      res.status(200).send(singleUser.findExist);
+    if (singleUser!==false) {
+      res.status(200).send(singleUser);
     } else {
-      res.status(400).send(singleUser.error);
+      res.status(400).send("error email not found");
     }
 
   }else{

@@ -1,7 +1,7 @@
 
 const express = require('express')
 const userManagementRoute = express.Router()
-const { postUserDataInJsonFile, getAllUserData, updateUserData, deleteSingleRecord, getPaginationData,deleteAllRecords } = require('../controller/userManagementController')
+const { postUserDataInJsonFile, getAllUserData, updateUserData, deleteSingleRecord, getPaginationData} = require('../controller/userManagementController')
 //router.use(express.json())
 /* Create - POST method */
 userManagementRoute.post('/', postUserDataInJsonFile)
@@ -15,6 +15,4 @@ userManagementRoute.get('/data/paginate', getPaginationData)
 userManagementRoute.patch('/:id', updateUserData)
 /* Delete  - Delete method */
 userManagementRoute.delete('/:id', deleteSingleRecord)
-/* Delete All data - Delete method */
-userManagementRoute.delete('/', deleteAllRecords)
 module.exports = userManagementRoute
